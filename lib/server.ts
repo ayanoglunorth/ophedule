@@ -17,9 +17,14 @@ export async function digest(value: string): Promise<string> {
 }
 
 export async function passwordHash(password: string, salt: string): Promise<string> {
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: Uint8Array.from(salt.match(/../g)!.map(byte => parseInt(byte, 16))), iterations: 600_000, hash: 'SHA-256' }, key, 256);
-  return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
+  const saltBytes = Uint8Array.from(salt.match(/../g)!.map(byte => parseInt(byte, 16)));
+  let material = new TextEncoder().encode(password);
+  // Workers caps each derivation at 100,000; six chained rounds retain 600,000 iterations of work.
+  for (let round = 0; round < 6; round++) {
+    const key = await crypto.subtle.importKey('raw', material, 'PBKDF2', false, ['deriveBits']);
+    material = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: saltBytes, iterations: 100_000, hash: 'SHA-256' }, key, 256));
+  }
+  return Array.from(material, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 export function equalHash(a: string, b: string): boolean {
