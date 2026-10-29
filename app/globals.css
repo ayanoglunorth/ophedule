@@ -3,7 +3,7 @@
 :root { --ink:#24313a; --muted:#697780; --line:#e8e9e8; --paper:#fffdfa; --violet:#6772bc; --lavender:#dce0fb; --peach:#f9d2c8; --cyan:#b8e9ed; --green:#d0ecd8; --yellow:#fff0bd; --red:#f8d5d1; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { margin:0; background:#eef0ff; color:var(--ink); font-family:Arial, Helvetica, sans-serif; }
+body { margin:0; background:#eef0ff; color:var(--ink); font-family:"Segoe UI",sans-serif; }
 button,input,textarea { font:inherit; }
 button { cursor:pointer; }
 button:disabled { cursor:not-allowed; opacity:.45; }
@@ -89,7 +89,7 @@ textarea { min-height:86px; resize:vertical; }
 .room-title-row { display:flex; justify-content:space-between; align-items:end; margin:22px 0 27px; }
 .room-badge { display:flex; align-items:center; gap:7px; border-radius:16px; padding:12px 16px; color:#6672b2; background:#e6e9fc; font-size:14px; }
 .tabs { display:flex; gap:8px; border-bottom:1px solid #dfe2eb; margin-bottom:24px; }
-.tabs button { display:inline-flex; align-items:center; gap:8px; padding:13px 18px 15px; border:0; border-bottom:3px solid transparent; background:transparent; color:#7d8795; font-size:13px; font-weight:700; }
+.tabs button { display:inline-flex; align-items:center; gap:8px; padding:13px 18px 15px; border:0; border-bottom:2px solid transparent; background:transparent; color:#7d8795; font-size:13px; font-weight:700; }
 .tabs button.active { color:#5464a8; border-bottom-color:#6977ba; }
 .tab-count { background:#e6e9f8; border-radius:8px; padding:2px 6px; font-size:10px; }
 .workspace-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr); gap:22px; align-items:start; }
@@ -162,3 +162,105 @@ textarea { min-height:86px; resize:vertical; }
 @media(max-width:680px) { .site-header,.main-wrap,.site-footer { width:min(100% - 28px,1180px); }.site-header { min-height:72px; }.brand { font-size:22px; }.brand-mark { width:31px; height:31px; }.greeting { display:none; }.auth-layout { grid-template-columns:1fr; padding:10px 0 50px; gap:20px; }.auth-intro { min-height:auto; padding:18px 2px 0; }.auth-intro h1 { font-size:44px; margin:14px 0; }.auth-intro p { font-size:15px; }.hero-doodle { display:none; }.auth-card { justify-self:stretch; width:100%; padding:25px; }.dashboard,.workspace { padding:25px 0 55px; }.heading-illustration { display:none; }.section-heading h1,.room-title-row h1 { font-size:38px; }.dashboard-grid,.side-stack { grid-template-columns:1fr; }.invite-card { flex-direction:column; align-items:stretch; }.room-title-row { align-items:start; }.room-badge { padding:8px; font-size:11px; }.tabs { overflow-x:auto; }.tabs button { white-space:nowrap; padding:12px 11px; }.calendar-panel,.side-card { padding:18px; }.calendar-grid { gap:4px; }.day-cell,.day-empty { min-height:48px; padding:5px; border-radius:8px; }.day-cell strong { font-size:11px; }.legend { gap:8px; font-size:10px; }.date-pair,.form-grid { grid-template-columns:1fr 1fr; }.list-heading { align-items:start; }.list-heading .primary-button { padding:0 11px; white-space:nowrap; }.trip-card { padding:18px; }.trip-metrics { gap:15px; }.trip-metrics strong { font-size:19px; }.site-footer { padding:15px 0 25px; }.site-footer span:last-child { display:none; } }
 @media(max-width:390px) { .date-pair,.form-grid { grid-template-columns:1fr; }.rating-row { gap:8px; }.trip-dates { width:100%; }.room-badge span { display:none; } }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { transition-duration:.01ms!important; animation-duration:.01ms!important; } }
+
+/* Ophedule: a calm planning surface. Colour is reserved for availability. */
+:root { --ink:#242c38; --muted:#586474; --line:#dce1e7; --paper:#ffffff; --violet:#424f91; --lavender:#e8ebfa; --peach:#eaa69b; --cyan:#d7edf0; --green:#dcefe2; --yellow:#fbefce; --red:#f7dfdc; }
+html { scroll-behavior:auto; }
+body { background:#f5f6f8; color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; }
+::selection { background:#cfd7ed; color:#202944; }
+input,textarea { caret-color:#354886; }
+.app-shell { background:#f5f6f8; }
+.decoration,.eyebrow,.heading-spark,.heading-illustration,.hero-doodle,.card-icon,.info-symbol { display:none!important; }
+.site-header { width:100%; max-width:none; min-height:72px; padding-inline:max(24px,calc((100vw - 1180px)/2)); background:#fff; border-bottom:1px solid var(--line); }
+.main-wrap,.site-footer { width:min(1180px,calc(100% - 48px)); }
+.brand { color:#293457; font-size:23px; letter-spacing:-.7px; gap:8px; }
+.brand-mark { width:29px; height:29px; border-radius:8px; background:#5f6ca9; box-shadow:none; transform:none; font-size:23px; }
+.brand-dot { color:#d98278; }
+.site-footer { border-top:1px solid var(--line); color:#697485; padding-block:20px; }
+.site-footer span:first-child { font-size:16px; color:#394977; }
+h1,h2,h3 { color:#263044; letter-spacing:-.025em; }
+.notice { border:1px solid #d8e3da; background:#f4faf4; box-shadow:0 8px 28px #22334d18; }
+.notice:not(.notice-ok) { background:#fff8f5; border-color:#ebcbc2; }
+.primary-button,.small-button { background:#465694; box-shadow:none; border-radius:9px; min-height:43px; }
+.primary-button:hover,.small-button:hover { background:#36467f; }
+.primary-button:active { transform:none; box-shadow:none; }
+.secondary-button { border-radius:9px; background:#f0f2fb; border-color:#dce1f3; box-shadow:none; }
+.icon-button,.month-nav button { border-color:var(--line); border-radius:8px; }
+input,textarea { border-color:#ccd4df; border-radius:8px; }
+input::placeholder,textarea::placeholder { color:#667281; opacity:1; }
+label { color:#3b485a; }
+.auth-layout { min-height:calc(100vh - 150px); grid-template-columns:minmax(0,1fr) 400px; gap:80px; padding:60px 0; }
+.auth-intro { padding:0; max-width:620px; }
+.auth-intro h1 { font-size:clamp(52px,5.4vw,76px); line-height:1.03; letter-spacing:-.035em; margin:0 0 24px; }
+.auth-intro h1 em { color:#6370ad; }
+.auth-intro p { max-width:450px; color:#4f5d70; font-size:18px; line-height:1.55; }
+.auth-card,.create-card,.room-list,.calendar-panel,.side-card,.trip-card,.trip-form,.members-main,.invite-card { border:1px solid var(--line); border-radius:14px; box-shadow:none; }
+.auth-card { padding:32px; gap:18px; }
+.auth-card h2 { font-size:25px; }
+.auth-card p { color:#596678; }
+.text-button { color:#3f528f; }
+.dashboard,.workspace { padding-top:44px; }
+.section-heading { margin-bottom:26px; }
+.section-heading h1,.room-title-row h1 { font-size:clamp(38px,4vw,52px); letter-spacing:-.035em; margin:0 0 7px; }
+.section-heading p,.room-title-row p { color:#586678; }
+.dashboard-grid { grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr); gap:18px; }
+.room-list,.create-card { min-height:280px; padding:24px; }
+.room-list h2 span { background:#e8ecf7; color:#42558d; }
+.room-card { border-radius:10px; padding:13px; }
+.room-avatar { width:42px; height:42px; border-radius:9px; background:#edf0f8; color:#52669c; }
+.create-card h2 { margin:0 0 2px; }
+.empty-state { padding:34px 18px; color:#687789; }
+.empty-state svg { display:none; }
+.empty-state h3 { margin-top:0; }
+.invite-card { background:#f9f7f1; }
+.pill { color:#825e42; }
+.room-title-row { margin-top:18px; margin-bottom:22px; }
+.room-badge { background:#e8ecf7; border-radius:9px; color:#3d528c; }
+.tabs { gap:26px; border-bottom-color:var(--line); }
+.tabs button { padding:11px 2px 12px; color:#586577; }
+.tabs button.active { color:#394d88; border-bottom-color:#40538e; }
+.tab-count { background:#e7ebf7; }
+.workspace-grid { grid-template-columns:minmax(0,1.48fr) minmax(300px,.72fr); gap:18px; }
+.calendar-panel { padding:24px; }
+.panel-header h2 { font-size:27px; margin:0; }
+.legend { color:#425268; font-size:12px; gap:9px 15px; margin:20px 0 16px; }
+.calendar-grid { gap:5px; }
+.weekday { color:#687586; font-size:11px; }
+.day-cell,.day-empty { min-height:70px; border-radius:6px; border-color:#dce2e9; padding:8px; }
+.day-cell { background:#fff; color:#263345; }
+.day-cell.green { background:#e0f0e5; border-color:#a8d4b9; }
+.day-cell.yellow { background:#fff2cf; border-color:#e6ce8b; }
+.day-cell.red { background:#f9e3df; border-color:#e7b7b1; }
+.day-cell:disabled { opacity:1; color:#9ca6b2; background:#f5f6f7; border-color:#e9ecf0; }
+.day-cell.selected { outline:2px solid #435693; outline-offset:-2px; }
+.day-cell.in-range { box-shadow:inset 0 0 0 1px #7887bf; }
+.day-marker { width:6px; height:6px; }
+.calendar-hint { color:#667386; }
+.side-card { padding:22px; }
+.day-detail .eyebrow { display:inline!important; color:#4a5880; font-size:12px; font-weight:700; letter-spacing:0; text-transform:none; }
+.side-card h2 { margin:0 0 7px; }
+.side-card p { color:#586778; }
+.status-button { border-radius:8px; font-size:13px; }
+.status-button.green { background:#e3f2e8; border-color:#afdbbf; }
+.status-button.yellow { background:#fff3d5; border-color:#e9d49b; }
+.status-button.red { background:#fae6e3; border-color:#e8beba; }
+.trips-layout,.members-layout { gap:18px; }
+.list-heading h2 { margin:0 0 5px; }
+.trip-list { gap:12px; }
+.trip-card { padding:22px; }
+.rank-badge { background:#eef1f9; color:#44588b; border-radius:7px; }
+.rank-badge.best { background:#e5ebf8; color:#354a82; }
+.rank-badge svg { display:none; }
+.trip-metrics { margin:18px 0 12px; }
+.trip-metrics strong { color:#34456e; }
+.rating-row { background:#f3f5f9; border-radius:8px; }
+.rating-buttons button { border-radius:6px; }
+.trip-form { padding:22px; }
+.info-card { background:#f9fafb; }
+.members-main { padding:22px; }
+.member-card { border-radius:8px; }
+.member-avatar { background:#edf0f8; }
+@media(max-width:900px) { .auth-layout { gap:32px; grid-template-columns:minmax(0,1fr) 360px; }.workspace-grid,.trips-layout,.members-layout { grid-template-columns:1fr; }.side-stack { grid-template-columns:1fr 1fr; } }
+@media(max-width:680px) { .site-header { min-height:64px; padding-inline:16px; }.main-wrap,.site-footer { width:calc(100% - 32px); }.auth-layout { grid-template-columns:1fr; gap:20px; padding:38px 0; }.auth-intro h1 { font-size:42px; margin-bottom:14px; }.auth-intro p { font-size:15px; }.auth-card { width:100%; padding:23px; }.dashboard,.workspace { padding-top:28px; }.dashboard-grid,.side-stack { grid-template-columns:1fr; }.section-heading h1,.room-title-row h1 { font-size:38px; }.tabs { gap:18px; }.tabs button { white-space:nowrap; }.calendar-panel,.side-card { padding:16px; }.calendar-grid { gap:3px; }.day-cell,.day-empty { min-height:48px; padding:5px; }.legend { font-size:10px; }.trip-card { padding:17px; } }
+
+.calendar-window { margin:4px 0 0; color:#667083; font-size:13px; }
