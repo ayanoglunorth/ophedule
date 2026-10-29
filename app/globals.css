@@ -130,22 +130,28 @@ h1 { letter-spacing:-.055em; }
 .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px; user-select:none; }
 .weekday { padding:7px 0; color:#596983; font-size:11px; font-weight:800; text-align:center; }
 .day-cell,.day-empty { min-height:67px; position:relative; padding:8px; border:1px solid #e1e5f0; border-radius:12px; background:#fff; text-align:left; }
-.day-cell { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; color:#25314c; }
+.day-cell { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; color:#25314c; transition:background-color .22s ease,border-color .22s ease,box-shadow .22s ease,transform .18s ease; }
 .day-cell strong { font-size:13px; }
 .day-cell.green { border-color:#9fd0b3; background:var(--green); }
 .day-cell.yellow { border-color:#dfbc70; background:var(--yellow); }
 .day-cell.red { border-color:#e1a59e; background:var(--red); }
 .day-cell.selected { outline:2px solid #d35f56; outline-offset:-2px; }
 .day-cell.in-range { box-shadow:inset 0 0 0 2px #8f9bd2; }
-.calendar-grid.range-green .day-cell.in-range { background:var(--green); }
-.calendar-grid.range-yellow .day-cell.in-range { background:var(--yellow); }
-.calendar-grid.range-red .day-cell.in-range { background:var(--red); }
-.day-cell:hover:not(:disabled) { border-color:#46579e; }
+.calendar-grid.painting .day-cell.in-range { animation:day-paint .28s cubic-bezier(.16,1,.3,1) both; }
+.calendar-grid.painting.range-green .day-cell.in-range { background:var(--green); }
+.calendar-grid.painting.range-yellow .day-cell.in-range { background:var(--yellow); }
+.calendar-grid.painting.range-red .day-cell.in-range { background:var(--red); }
+.day-cell:hover:not(:disabled) { border-color:#46579e; transform:translateY(-2px); }
 .day-cell:disabled { background:#f4f5f8; color:#99a3b4; opacity:1; }
-.day-marker { width:7px; height:7px; border-radius:50%; background:#cad0de; }
+.day-marker { width:7px; height:7px; border-radius:50%; background:#cad0de; transition:background-color .22s ease,transform .22s cubic-bezier(.16,1,.3,1); }
 .day-cell.green .day-marker { background:#65ad83; }
 .day-cell.yellow .day-marker { background:#be9143; }
 .day-cell.red .day-marker { background:#c97069; }
+.calendar-grid.painting .day-cell.in-range .day-marker { transform:scale(1.4); }
+.calendar-grid.painting.range-green .day-cell.in-range .day-marker { background:#65ad83; }
+.calendar-grid.painting.range-yellow .day-cell.in-range .day-marker { background:#be9143; }
+.calendar-grid.painting.range-red .day-cell.in-range .day-marker { background:#c97069; }
+@keyframes day-paint { from { transform:scale(.94); box-shadow:inset 0 0 0 0 #8f9bd2; } to { transform:scale(1); box-shadow:inset 0 0 0 2px #8f9bd2; } }
 .calendar-hint { display:flex; align-items:center; gap:7px; margin:19px 0 0; color:#647089; font-size:11px; }
 .side-stack { display:grid; gap:18px; }
 .side-card h2 { margin:0 0 7px; font-size:23px; }
@@ -155,11 +161,12 @@ h1 { letter-spacing:-.055em; }
 .date-pair { margin:19px 0; }
 .date-pair input { padding:9px; font-size:12px; }
 .status-actions { display:grid; gap:8px; }
-.status-button { min-height:40px; display:flex; align-items:center; gap:10px; padding:0 12px; border:1px solid #e2e4ed; border-radius:12px; background:#fff; color:#35415c; font-size:12px; font-weight:800; text-align:left; }
+.status-button { min-height:40px; display:flex; align-items:center; gap:10px; padding:0 12px; border:1px solid #e2e4ed; border-radius:12px; background:#fff; color:#35415c; font-size:12px; font-weight:800; text-align:left; transition:background-color .18s ease,box-shadow .18s ease; }
 .status-button.green { border-color:#afd9bf; background:#e5f5e9; }
 .status-button.yellow { border-color:#e5ce90; background:#fff6dd; }
 .status-button.red { border-color:#e5b5ae; background:#fbe9e5; }
-.status-button.brush-active { outline:2px solid #344f9b; outline-offset:2px; }
+.status-button.brush-active { outline:2px solid #344f9b; outline-offset:2px; box-shadow:0 4px 12px #34457a1a; }
+.status-button.brush-active .dot { transform:scale(1.25); }
 .status-button:hover:not(:disabled) { filter:brightness(.97); }
 .status-button.clear { justify-content:center; color:#57627a; }
 .eyebrow { display:inline-block; margin-bottom:8px; color:#4c5b91; font-size:12px; font-weight:800; }
