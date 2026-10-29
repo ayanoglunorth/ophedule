@@ -94,7 +94,7 @@ export default function Home() {
       const result = await api(action, fields);
       if (after) after(result);
       await load(action === 'login' || action === 'register' || action === 'logout' || action === 'createRoom' || action === 'joinRoom' ? null : roomId);
-      setMessage('Kaydedildi.');
+      if (action !== 'login' && action !== 'register' && action !== 'logout') setMessage('Kaydedildi.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'İşlem tamamlanamadı.'); }
     finally { setBusy(false); }
   }
