@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
   const window = calendarWindow();
   const [membersRows, availabilityRows, tripRows, ratingRows, pendingRows] = await Promise.all([
     db.prepare("SELECT users.id, users.username AS name, memberships.budget FROM memberships JOIN users ON users.id = memberships.user_id WHERE memberships.room_id = ? AND memberships.status = 'approved' ORDER BY users.username").bind(roomId).all<Member>(),
-    db.prepare('SELECT user_id AS userId, day, status FROM availability WHERE room_id = ? AND day BETWEEN ? AND ?').bind(roomId, window.start, window.end).all<Availability>(),
+    db.prepare("SELECT availability.user_id AS userId, availability.day, availability.status FROM availability JOIN memberships ON memberships.room_id = availability.room_id AND memberships.user_id = availability.user_id AND memberships.status = 'approved' WHERE availability.room_id = ? AND availability.day BETWEEN ? AND ?").bind(roomId, window.start, window.end).all<Availability>(),
     db.prepare('SELECT id, creator_id AS creatorId, title, description, start_day AS startDay, end_day AS endDay, flight_cost AS flightCost, spend_cost AS spendCost, created_at AS createdAt FROM trips WHERE room_id = ? AND end_day >= ? ORDER BY created_at DESC').bind(roomId, window.start).all<Trip & { creatorId: string; description: string }>(),
-    db.prepare('SELECT ratings.trip_id AS tripId, ratings.user_id AS userId, ratings.score FROM ratings JOIN trips ON trips.id = ratings.trip_id WHERE trips.room_id = ?').bind(roomId).all<Rating>(),
+    db.prepare("SELECT ratings.trip_id AS tripId, ratings.user_id AS userId, ratings.score FROM ratings JOIN trips ON trips.id = ratings.trip_id JOIN memberships ON memberships.room_id = trips.room_id AND memberships.user_id = ratings.user_id AND memberships.status = 'approved' WHERE trips.room_id = ?").bind(roomId).all<Rating>(),
     room.ownerId === user.id ? db.prepare("SELECT users.id, users.username AS name FROM memberships JOIN users ON users.id = memberships.user_id WHERE memberships.room_id = ? AND memberships.status = 'pending'").bind(roomId).all() : Promise.resolve({ results: [] }),
   ]);
   const members = membersRows.results;

@@ -19,11 +19,12 @@ export async function POST(request: NextRequest) {
     const db = database();
 
     if (input.action === 'register' || input.action === 'login') {
-      const address = request.headers.get('cf-connecting-ip') ?? 'local-preview';
-      const key = await digest(`auth:${address}`);
+      const address = request.headers.get('cf-connecting-ip') ?? 'address-unavailable';
+      const key = await digest(`auth:${input.action}:${address}`);
       const now = Date.now();
       const limit = await db.prepare('SELECT attempts, reset_at AS resetAt FROM auth_limits WHERE key = ?').bind(key).first<{ attempts: number; resetAt: number }>();
-      need(!limit || limit.resetAt < now || limit.attempts < 10, 'Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
+      const maximum = address === 'address-unavailable' ? 100 : input.action === 'register' ? 30 : 60;
+      need(!limit || limit.resetAt < now || limit.attempts < maximum, 'Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
       await db.prepare('INSERT INTO auth_limits (key, attempts, reset_at) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET attempts = CASE WHEN reset_at < ? THEN 1 ELSE attempts + 1 END, reset_at = CASE WHEN reset_at < ? THEN excluded.reset_at ELSE reset_at END').bind(key, now + 15 * 60_000, now, now).run();
     }
 
@@ -89,11 +90,7 @@ export async function POST(request: NextRequest) {
         need(member.status === 'pending', 'Onay bekleyen üye yok.');
         await db.prepare("UPDATE memberships SET status = 'approved' WHERE room_id = ? AND user_id = ?").bind(roomId, targetId).run();
       } else {
-        await db.batch([
-          db.prepare('DELETE FROM availability WHERE room_id = ? AND user_id = ?').bind(roomId, targetId),
-          db.prepare('DELETE FROM ratings WHERE user_id = ? AND trip_id IN (SELECT id FROM trips WHERE room_id = ?)').bind(targetId, roomId),
-          db.prepare('DELETE FROM memberships WHERE room_id = ? AND user_id = ?').bind(roomId, targetId),
-        ]);
+        await db.prepare('DELETE FROM memberships WHERE room_id = ? AND user_id = ?').bind(roomId, targetId).run();
       }
       return reply({ ok: true });
     }
