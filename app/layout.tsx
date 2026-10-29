@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Ophedule — Birlikte daha güzel planlara',
-  description: 'Arkadaşlarınla ortak takvim oluştur, uygunlukları gör ve gezileri birlikte planla.',
+  title: 'Ophedule | Arkadaşlarla plan yap',
+  description: 'Arkadaşlarınla uygun günleri işaretle, gezi fikirlerini karşılaştır.',
   icons: { icon: '/favicon.svg' },
 };
 
