@@ -121,6 +121,10 @@ h1 { letter-spacing:-.055em; }
 .panel-header h2 { text-transform:capitalize; }
 .calendar-window { margin:5px 0 0; color:#586682; font-size:13px; }
 .month-nav { display:flex; gap:8px; }
+.calendar-view { display:inline-flex; gap:4px; margin-top:18px; padding:4px; border-radius:13px; background:#edf0f9; }
+.calendar-view button { min-height:36px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:#465575; font-size:12px; font-weight:800; }
+.calendar-view button.active { background:#fff; color:#293e82; box-shadow:0 3px 9px #56638422; }
+.calendar-view button:focus-visible { outline:3px solid #344f9b; outline-offset:2px; }
 .legend { display:flex; flex-wrap:wrap; gap:9px 16px; margin:22px 0 20px; color:#4e5b76; font-size:12px; }
 .legend span { display:inline-flex; align-items:center; gap:6px; }
 .dot { width:10px; height:10px; display:inline-block; flex:none; border:1px solid #a9adb1; border-radius:50%; background:#fff; }
@@ -135,6 +139,15 @@ h1 { letter-spacing:-.055em; }
 .day-cell.green { border-color:#9fd0b3; background:var(--green); }
 .day-cell.yellow { border-color:#dfbc70; background:var(--yellow); }
 .day-cell.red { border-color:#e1a59e; background:var(--red); }
+.day-cell.group-day { background:#f6f7fb; border-color:#e0e4ee; }
+.day-cell.group-day.some-ready { background:#fff9ed; border-color:#e8d8b8; }
+.day-cell.group-day.all-ready { background:#eaf7f0; border-color:#b7ddc5; }
+.group-count { color:#3c4962; font-size:10px; font-weight:800; white-space:nowrap; }
+.group-bar { display:flex; width:100%; height:6px; overflow:hidden; border-radius:5px; background:#d6dce8; }
+.group-bar i.green { background:#67ba8b; }
+.group-bar i.yellow { background:#e2b456; }
+.group-bar i.red { background:#df8a82; }
+.group-bar i.unknown { background:#cbd3e1; }
 .day-cell.selected { outline:2px solid #d35f56; outline-offset:-2px; }
 .day-cell.in-range { box-shadow:inset 0 0 0 2px #8f9bd2; }
 .calendar-grid.painting .day-cell.in-range { animation:day-paint .28s cubic-bezier(.16,1,.3,1) both; }
@@ -153,6 +166,7 @@ h1 { letter-spacing:-.055em; }
 .calendar-grid.painting.range-red .day-cell.in-range .day-marker { background:#c97069; }
 @keyframes day-paint { from { transform:scale(.94); box-shadow:inset 0 0 0 0 #8f9bd2; } to { transform:scale(1); box-shadow:inset 0 0 0 2px #8f9bd2; } }
 .calendar-hint { display:flex; align-items:center; gap:7px; margin:19px 0 0; color:#647089; font-size:11px; }
+.calendar-hint svg { flex:none; }
 .side-stack { display:grid; gap:18px; }
 .side-card h2 { margin:0 0 7px; font-size:23px; }
 .side-card p { color:var(--muted); font-size:13px; line-height:1.55; }
@@ -170,6 +184,7 @@ h1 { letter-spacing:-.055em; }
 .status-button:hover:not(:disabled) { filter:brightness(.97); }
 .status-button.clear { justify-content:center; color:#57627a; }
 .eyebrow { display:inline-block; margin-bottom:8px; color:#4c5b91; font-size:12px; font-weight:800; }
+.group-breakdown { padding:10px 0; border-bottom:1px solid #edf0f6; color:#4b5875; }
 .person-list>div,.trip-people>div>div { display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid #edf0f6; font-size:12px; }
 .person-list>div:last-child,.trip-people>div>div:last-child { border-bottom:0; }
 .mini-avatar,.member-avatar { display:grid; place-items:center; flex:none; width:27px; height:27px; border-radius:50%; background:#e6eaff; color:#425594; font-weight:800; }
@@ -271,9 +286,14 @@ h1 { letter-spacing:-.055em; }
   .tabs button { flex:none; white-space:nowrap; padding:12px 2px; }
   .calendar-panel,.side-card { padding:16px; }
   .panel-header h2,.list-heading h2 { font-size:27px; }
+  .calendar-view { width:100%; }
+  .calendar-view button { flex:1; padding:0 7px; }
   .calendar-grid { gap:3px; }
   .day-cell,.day-empty { min-height:48px; padding:5px; border-radius:8px; }
   .day-cell strong { font-size:11px; }
+  .group-count { font-size:10px; }
+  .group-count span { display:none; }
+  .group-bar { height:5px; }
   .legend { gap:8px; font-size:10px; }
   .date-pair,.form-grid { grid-template-columns:1fr 1fr; }
   .list-heading { align-items:start; }
