@@ -13,6 +13,7 @@ type Trip = { id: string; creatorId: string; title: string; description: string;
 type RoomState = { user: User; room: Room; window: { start: string; end: string }; members: Member[]; availability: Availability[]; trips: Trip[]; ratings: { tripId: string; userId: string; score: number }[]; pending: { id: string; name: string }[] };
 
 const statusLabels: Record<Status, string> = { green: 'Uygunum', yellow: 'Ayarlayabilirim', red: 'Gelemem' };
+const dayGroupLabels = { green: 'Gelebilenler', yellow: 'Ayarlayabilenler', red: 'Gelemeyenler', unknown: 'Henüz işaretlemeyenler' };
 const reasonLabels: Record<string, string> = { available: 'Uygun', conditional: 'Koşullu uygun', notInterested: 'İlgilenmiyor', red: 'Uygun değil', unknown: 'Takvim eksik', budgetMissing: 'Bütçe eksik', overBudget: 'Bütçeyi aşıyor' };
 const weekdays = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pa'];
 const moneyText = (value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(value);
@@ -122,8 +123,10 @@ export default function Home() {
     }
     return days;
   }, [state]);
-  const selectedCounts = groupDays.get(selectedDay) ?? { green: 0, yellow: 0, red: 0 };
   const selectedPeople = state?.members.map(member => ({ ...member, status: state.availability.find(item => item.userId === member.id && item.day === selectedDay)?.status })) ?? [];
+  const dayGroups = (['green', 'yellow', 'red', 'unknown'] as const)
+    .map(status => ({ status, people: selectedPeople.filter(person => (person.status ?? 'unknown') === status) }))
+    .filter(group => group.people.length > 0);
   const ownBudget = state?.members.find(member => member.id === user?.id)?.budget;
 
   function pickDay(day: string) {
@@ -205,7 +208,7 @@ export default function Home() {
           </div>
           <div className="side-stack">
             {calendarView === 'mine' && <div className="side-card"><h2>Tarihleri işaretle</h2><p>Durumunu seç, sonra takvimden günleri işaretle. Tarih aralığını buradan da girebilirsin.</p><div className="date-pair"><label>Başlangıç<input type="date" lang="tr-TR" min={state.window.start} max={state.window.end} value={from} onChange={event => { setFrom(event.target.value); setTo(''); }} /></label><label>Bitiş<input type="date" lang="tr-TR" min={from || state.window.start} max={state.window.end} value={to} onChange={event => setTo(event.target.value)} /></label></div><div className="status-actions">{(['green', 'yellow', 'red'] as Status[]).map(status => <button key={status} disabled={busy} className={`status-button ${status} ${brush === status ? 'brush-active' : ''}`} aria-pressed={brush === status} onClick={() => setBrush(status)}><i className={`dot ${status}`}/>{statusLabels[status]}</button>)}<button disabled={busy || !from} className="primary-button full" onClick={() => run('setAvailability', { roomId, from, to: to || from, status: brush })}>Seçili tarihleri işaretle <Check size={16}/></button><button disabled={busy || !from} className="status-button clear" onClick={() => run('setAvailability', { roomId, from, to: to || from, status: null })}>İşareti kaldır</button></div></div>}
-            <div className="side-card day-detail">{selectedDay && <span className="eyebrow">{dateText(selectedDay)}</span>}<h2>O gün kim uygun?</h2>{selectedDay ? <>{calendarView === 'group' && <p className="group-breakdown">{selectedCounts.green} uygun · {selectedCounts.yellow} ayarlayabilir · {selectedCounts.red} gelemez · {state.members.length - selectedCounts.green - selectedCounts.yellow - selectedCounts.red} işaretlemedi</p>}<div className="person-list">{selectedPeople.map(person => <div key={person.id}><span className="mini-avatar">{person.name[0].toLocaleUpperCase('tr-TR')}</span><strong>{person.name}</strong><span className={`person-status ${person.status ?? 'unknown'}`}>{person.status ? statusLabels[person.status] : 'İşaretlenmedi'}</span></div>)}</div></> : <p>Bir gün seç, kimlerin uygun olduğuna bakalım.</p>}</div>
+            <div className="side-card day-detail">{selectedDay && <span className="eyebrow">{dateText(selectedDay)}</span>}<h2>O gün kim uygun?</h2>{selectedDay ? <div className="availability-groups">{dayGroups.map(group => <section className={`availability-group ${group.status}`} key={group.status} aria-label={`${dayGroupLabels[group.status]}: ${group.people.length} kişi`}><h3><span className="availability-mark" aria-hidden="true"/>{dayGroupLabels[group.status]}<span className="availability-count">{group.people.length}</span></h3><ul>{group.people.map(person => <li key={person.id}><span className="mini-avatar" aria-hidden="true">{person.name[0].toLocaleUpperCase('tr-TR')}</span><strong>{person.name}</strong><span className="person-status">{person.status ? statusLabels[person.status] : 'İşaretlenmedi'}</span></li>)}</ul></section>)}</div> : <p>Bir gün seç, kimlerin uygun olduğuna bakalım.</p>}</div>
           </div>
         </div>}
 
