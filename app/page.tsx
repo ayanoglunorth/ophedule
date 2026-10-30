@@ -17,7 +17,7 @@ const dayGroupLabels = { green: 'Gelebilenler', yellow: 'Ayarlayabilenler', red:
 const reasonLabels: Record<string, string> = { available: 'Uygun', conditional: 'Koşullu uygun', notInterested: 'İlgilenmiyor', red: 'Uygun değil', unknown: 'Takvim eksik', budgetMissing: 'Bilet bütçesi eksik', overBudget: 'Bilet bütçesini aşıyor' };
 const weekdays = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pa'];
 const moneyText = (value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(value);
-const dateText = (value: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
+const dateText = (value: string) => `${value.slice(8, 10)}/${value.slice(5, 7)}/${value.slice(0, 4)}`;
 const monthText = (value: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
 const emptyTrip = { title: '', description: '', startDay: '', endDay: '', flightCost: '', spendCost: '' };
 const introSteps = [
