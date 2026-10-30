@@ -514,7 +514,7 @@ input:hover,textarea:hover { border-color:#999fbd; }
   .dashboard-art { width:37%; }
 }
 
-.intro-dialog { width:min(500px,calc(100% - 28px)); max-height:calc(100dvh - 28px); overflow:auto; padding:0; border:1.5px solid #c5cbe5; border-radius:28px 17px 31px 18px; background:#fffefa; color:var(--ink); box-shadow:8px 10px 0 #b8c2ed80,0 30px 80px #1f2d5e55; }
+.intro-dialog { position:fixed; inset:0; width:min(500px,calc(100% - 28px)); max-height:calc(100dvh - 28px); overflow:auto; margin:auto; padding:0; border:1.5px solid #c5cbe5; border-radius:28px 17px 31px 18px; background:#fffefa; color:var(--ink); box-shadow:8px 10px 0 #b8c2ed80,0 30px 80px #1f2d5e55; }
 .intro-dialog::backdrop { background:#222846a8; backdrop-filter:blur(3px); }
 .intro-content { min-height:320px; display:flex; flex-direction:column; padding:28px 30px 30px; }
 .intro-top { display:flex; align-items:center; justify-content:space-between; gap:16px; }
