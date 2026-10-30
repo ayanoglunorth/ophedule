@@ -21,7 +21,6 @@ export function rankTrips(trips: Trip[], members: Member[], availability: Availa
   const interest = new Map(ratings.map(item => [`${item.tripId}:${item.userId}`, item.score]));
   return trips.map(trip => {
     const days = daysBetween(trip.startDay, trip.endDay);
-    const cost = trip.flightCost + trip.spendCost;
     const people = members.map(member => {
       const score = interest.get(`${trip.id}:${member.id}`) ?? 3;
       const states = days.map(day => statuses.get(`${member.id}:${day}`));
@@ -30,7 +29,7 @@ export function rankTrips(trips: Trip[], members: Member[], availability: Availa
       else if (states.includes('red')) reason = 'red';
       else if (states.some(state => !state)) reason = 'unknown';
       else if (member.budget === null) reason = 'budgetMissing';
-      else if (member.budget < cost) reason = 'overBudget';
+      else if (member.budget < trip.flightCost) reason = 'overBudget';
       else reason = states.includes('yellow') ? 'conditional' : 'available';
       return { ...member, reason, interest: score };
     });

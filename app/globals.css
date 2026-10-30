@@ -203,7 +203,8 @@ h1 { letter-spacing:-.05em; }
 .reason { margin-left:auto; color:#59657b; font-size:11px; text-align:right; }
 .reason.available { color:#28704f; }
 .reason.conditional { color:#89631b; }
-.reason.red,.reason.notInterested { color:#a44c48; }
+.reason.red,.reason.notInterested,.reason.overBudget { color:#a44c48; }
+.reason.budgetMissing { color:#89631b; }
 
 .trips-layout,.members-layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; align-items:start; gap:16px; }
 .list-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin:2px 0 17px; }
@@ -224,6 +225,9 @@ h1 { letter-spacing:-.05em; }
 .trip-metrics strong small { color:#7c87a0; font-size:14px; }
 .trip-metrics span { color:#68748c; font-size:11px; }
 .cost-breakdown { padding-top:12px; border-top:1px dashed #dfe3ed; color:#6d7890; font-size:11px; }
+.flight-budget-alert { display:grid; gap:3px; margin-top:14px; padding:11px 13px; border:1px solid #e7b7b1; border-radius:13px 8px 15px 9px; background:#fce9e6; color:#863b38; font-size:12px; }
+.flight-budget-alert strong { font-size:12px; }
+.flight-budget-alert span { overflow-wrap:anywhere; }
 .rating-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:17px; padding:14px 0 0; border-top:1px solid #e5e8f3; font-size:12px; font-weight:800; }
 .rating-row small { color:#6c7790; font-size:10px; font-weight:400; }
 .rating-buttons { display:flex; gap:4px; }
@@ -242,6 +246,10 @@ h1 { letter-spacing:-.05em; }
 .info-card { background:var(--paper); }
 .info-card h3 { margin:0 0 9px; font-size:19px; }
 .info-card p { font-size:12px; }
+.budget-card { display:grid; gap:12px; }
+.budget-card h2,.budget-card p { margin:0; }
+.budget-card label,.budget-card .primary-button { margin-top:4px; }
+.budget-card small { display:block; margin-top:2px; }
 .members-main { padding:22px; }
 .member-cards { display:grid; gap:10px; }
 .member-card { display:flex; align-items:center; gap:13px; padding:12px 2px; border-bottom:1px solid #e7e9f3; }
@@ -435,6 +443,7 @@ input:hover,textarea:hover { border-color:#999fbd; }
 .status-button { border:1.5px solid #d3d6e5; border-radius:13px 20px 12px 18px; }
 .status-button.brush-active { outline-color:#a84a45; box-shadow:3px 4px 0 #edb5aa; }
 .trips-layout,.members-layout { gap:23px; }
+.trips-aside { display:grid; gap:18px; }
 .trip-list { gap:22px; }
 .trip-card { position:relative; overflow:hidden; padding:27px 30px; border-radius:30px 17px 35px 17px; background:#fffcf6; }
 .trip-card::before,.trip-card::after { content:""; position:absolute; right:-13px; width:26px; height:26px; border:1.5px solid #d9dced; border-radius:50%; background:#d7defb; }

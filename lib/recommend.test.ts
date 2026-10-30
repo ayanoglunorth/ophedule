@@ -17,7 +17,7 @@ const availability = [
 ];
 const trips: Trip[] = [
   { id: 'cheap', title: 'Uygun gezi', startDay: '2026-12-15', endDay: '2026-12-16', flightCost: 1000, spendCost: 1000, createdAt: 1 },
-  { id: 'expensive', title: 'Pahalı gezi', startDay: '2026-12-15', endDay: '2026-12-16', flightCost: 4000, spendCost: 1000, createdAt: 2 },
+  { id: 'expensive', title: 'Pahalı gezi', startDay: '2026-12-15', endDay: '2026-12-16', flightCost: 4000, spendCost: 3000, createdAt: 2 },
 ];
 
 test('ranks eligible people first and explains conditional and budget status', () => {
@@ -26,6 +26,8 @@ test('ranks eligible people first and explains conditional and budget status', (
   assert.equal(result[0].eligibleCount, 2);
   assert.equal(result[0].people.find(person => person.id === 'a')?.reason, 'conditional');
   assert.equal(result[0].people.find(person => person.id === 'c')?.reason, 'budgetMissing');
+  assert.equal(result[1].eligibleCount, 1);
+  assert.equal(result[1].people.find(person => person.id === 'a')?.reason, 'conditional');
   assert.equal(result[1].people.find(person => person.id === 'b')?.reason, 'overBudget');
 });
 
