@@ -290,8 +290,8 @@ h1 { letter-spacing:-.05em; }
   .room-title-row { align-items:start; margin:8px 0 10px; }
   .room-badge { padding:8px; font-size:11px; }
   .room-badge span { display:none; }
-  .tabs { gap:16px; overflow-x:auto; }
-  .tabs button { flex:none; white-space:nowrap; padding:10px 2px; }
+  .tabs { gap:6px; justify-content:space-between; }
+  .tabs button { flex:none; gap:5px; white-space:nowrap; padding:10px 0; font-size:12px; }
   .calendar-panel,.side-card { padding:16px; }
   .panel-header h2,.list-heading h2 { font-size:25px; }
   .calendar-view { width:100%; }
