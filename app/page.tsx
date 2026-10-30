@@ -20,6 +20,12 @@ const moneyText = (value: number) => new Intl.NumberFormat('tr-TR', { style: 'cu
 const dateText = (value: string) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
 const monthText = (value: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
 const emptyTrip = { title: '', description: '', startDay: '', endDay: '', flightCost: '', spendCost: '' };
+const introSteps = [
+  { title: 'Odaya gir', text: 'Bir oda aç veya gelen davetle katıl. Odayı açan kişi, katılma isteklerini Üyeler bölümünden onaylar.' },
+  { title: 'Günlerini işaretle', text: 'Benim takvimim bölümünde bir durum seçip günlere dokun. Yeşil: uygunum. Sarı: ayarlayabilirim. Kırmızı: gelemem. Ortak takvimde bir güne dokununca herkesin yanıtını görürsün.' },
+  { title: 'Bilet bütçeni gir', text: 'Geziler bölümüne gidiş dönüş uçak bileti için üst sınırını yaz. Diğer harcamalar bu sınırla karşılaştırılmaz. Bilet tutarı sınırını aşan kişiler gezi kartında görünür.' },
+  { title: 'Gezi ekle', text: 'Tarihleri, bilet tutarını ve kişi başı harcamayı gir. Gezi kartı kaç kişinin katılabileceğini gösterir. İstersen ilgi puanı ver; 0 puan o geziye katılmak istemediğin anlamına gelir.' },
+] as const;
 
 function Doodle({ className }: { className: string }) {
   return <svg className={className} viewBox="0 0 420 170" fill="none" aria-hidden="true" focusable="false">
@@ -80,6 +86,36 @@ export default function Home() {
   const [editingTripId, setEditingTripId] = useState<string | null>(null);
   const [tripForm, setTripForm] = useState(emptyTrip);
   const [showTripForm, setShowTripForm] = useState(false);
+  const [introStep, setIntroStep] = useState<number | null>(null);
+  const introDialog = useRef<HTMLDialogElement>(null);
+  const introTitle = useRef<HTMLHeadingElement>(null);
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+    try {
+      if (localStorage.getItem(`ophedule:intro:${userId}`) === 'done') return;
+    } catch { /* The guide can still open when storage is unavailable. */ }
+    // Restore the guide after the signed-in user is known.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIntroStep(0);
+  }, [userId]);
+
+  useEffect(() => {
+    const dialog = introDialog.current;
+    if (!dialog) return;
+    if (introStep === null) { if (dialog.open) dialog.close(); return; }
+    if (!dialog.open) dialog.showModal();
+    introTitle.current?.focus();
+  }, [introStep]);
+
+  function closeIntro() {
+    if (userId) {
+      try { localStorage.setItem(`ophedule:intro:${userId}`, 'done'); } catch { /* Browsing remains available without storage. */ }
+    }
+    if (introDialog.current?.open) introDialog.current.close();
+    setIntroStep(null);
+  }
 
   const load = useCallback(async (target: string | null) => {
     const response = await fetch(`/api/state${target ? `?room=${encodeURIComponent(target)}` : ''}`, { cache: 'no-store' });
@@ -165,7 +201,7 @@ export default function Home() {
     
     <header className="site-header">
       <button className="brand" onClick={() => { setRoomId(null); setState(null); load(null); }} aria-label="Ophedule ana sayfa"><img className="brand-mark" src="/favicon.svg" width="38" height="38" alt="" /><span>ophedule<span className="brand-dot">.</span></span></button>
-      <div className="header-right">{user && <><span className="greeting">Merhaba, <strong>{user.username}</strong></span><button className="icon-button" onClick={() => run('logout', {}, () => { setRoomId(null); setState(null); setUser(null); })} aria-label="Çıkış yap" title="Çıkış yap"><LogOut size={18} /></button></>}</div>
+      <div className="header-right">{user && <><span className="greeting">Merhaba, <strong>{user.username}</strong></span><button className="icon-button" onClick={() => setIntroStep(0)} aria-label="Kullanım rehberini aç" title="Kullanım rehberi"><CircleHelp size={18} /></button><button className="icon-button" onClick={() => run('logout', {}, () => { setRoomId(null); setState(null); setUser(null); setIntroStep(null); })} aria-label="Çıkış yap" title="Çıkış yap"><LogOut size={18} /></button></>}</div>
     </header>
     <main id="main" className="main-wrap">
       {message && <div className={`notice ${message === 'Kaydedildi.' ? 'notice-ok' : ''}`} role="status"><span>{message}</span><button onClick={() => setMessage('')} aria-label="Bildirimi kapat"><X size={16} /></button></div>}
@@ -217,5 +253,14 @@ export default function Home() {
         {tab === 'members' && <div className="members-layout"><div className="members-main"><div className="list-heading"><div><h2>Üyeler</h2><p>Odadaki kişileri burada görebilirsin.</p></div></div><div className="member-cards">{state.members.map(member => <div className="member-card" key={member.id}><span className="member-avatar">{member.name[0].toLocaleUpperCase('tr-TR')}</span><div><strong>{member.name}{member.id === state.room.ownerId && <small> · Yönetici</small>}</strong></div>{member.id === user.id && <span className="you-badge">Sen</span>}{state.room.ownerId === user.id && member.id !== user.id && <button className="remove-button" onClick={() => { if (confirm(`${member.name} adlı üyeyi odadan çıkarmak istiyor musun?`)) run('removeMember', { roomId, userId: member.id }); }}>Çıkar</button>}</div>)}</div>{state.room.ownerId === user.id && state.pending.length > 0 && <div className="pending-card"><h3>Onay bekleyenler</h3>{state.pending.map(person => <div key={person.id}><strong>{person.name}</strong><button className="small-button" onClick={() => run('approveMember', { roomId, userId: person.id })}>Onayla</button><button className="remove-button" onClick={() => run('removeMember', { roomId, userId: person.id })}>Reddet</button></div>)}</div>}</div><aside className="side-stack"><div className="side-card"><h2>Arkadaşlarını çağır</h2><p>Bağlantıyı arkadaşlarına gönder. Katılma isteklerini oda yöneticisi onaylar.</p><button className="secondary-button full" onClick={async () => { await navigator.clipboard.writeText(`${location.origin}/?invite=${state.room.inviteToken}`); setMessage('Davet bağlantısı kopyalandı.'); }}>Bağlantıyı kopyala <Copy size={17}/></button></div></aside></div>}
       </section>}
     </main><footer className="site-footer"><span className="footer-brand"><img src="/favicon.svg" width="25" height="25" alt="" /><span>ophedule<span className="brand-dot">.</span></span></span></footer>
+    <dialog ref={introDialog} className="intro-dialog" aria-labelledby="intro-title" aria-describedby="intro-text" onCancel={event => { event.preventDefault(); closeIntro(); }}>
+      {introStep !== null && <div className="intro-content">
+        <div className="intro-top"><span className="intro-counter">Kullanım rehberi · {introStep + 1} / {introSteps.length}</span><button type="button" className="intro-skip" onClick={closeIntro}>Rehberi kapat <X size={16}/></button></div>
+        <div className="intro-progress" aria-hidden="true">{introSteps.map((step, index) => <span key={step.title} className={index <= introStep ? 'active' : ''}/>)}</div>
+        <h2 id="intro-title" ref={introTitle} tabIndex={-1}>{introSteps[introStep].title}</h2>
+        <p id="intro-text">{introSteps[introStep].text}</p>
+        <div className="intro-actions">{introStep > 0 ? <button type="button" className="intro-back" onClick={() => setIntroStep(introStep - 1)}><ChevronLeft size={17}/> Geri</button> : <span/>}<button type="button" className="primary-button" onClick={() => introStep === introSteps.length - 1 ? closeIntro() : setIntroStep(introStep + 1)}>{introStep === introSteps.length - 1 ? 'Tamam' : 'İleri'} {introStep === introSteps.length - 1 ? <Check size={17}/> : <ChevronRight size={17}/>}</button></div>
+      </div>}
+    </dialog>
   </div>;
 }
