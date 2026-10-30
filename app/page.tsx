@@ -20,9 +20,9 @@ const dateText = (value: string) => new Intl.DateTimeFormat('tr-TR', { day: 'num
 const monthText = (value: string) => new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
 const emptyTrip = { title: '', description: '', startDay: '', endDay: '', flightCost: '', spendCost: '' };
 
-async function api(action: string, fields: Record<string, unknown> = {}) {
+async function api<T = Record<string, unknown>>(action: string, fields: Record<string, unknown> = {}): Promise<T> {
   const response = await fetch('/api/action', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action, ...fields }) });
-  const result = await response.json() as any;
+  const result = await response.json() as T & { error?: string };
   if (!response.ok) throw new Error(result.error || 'İşlem tamamlanamadı.');
   return result;
 }
@@ -56,7 +56,7 @@ export default function Home() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [newRoom, setNewRoom] = useState('');
-  const [invite, setInvite] = useState('');
+  const [invite, setInvite] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('invite') ?? '');
   const [monthIndex, setMonthIndex] = useState(0);
   const [selectedDay, setSelectedDay] = useState('');
   const [brush, setBrush] = useState<Status>('green');
@@ -72,9 +72,9 @@ export default function Home() {
   const [tripForm, setTripForm] = useState(emptyTrip);
   const [showTripForm, setShowTripForm] = useState(false);
 
-  const load = useCallback(async (target: string | null = roomId) => {
+  const load = useCallback(async (target: string | null) => {
     const response = await fetch(`/api/state${target ? `?room=${encodeURIComponent(target)}` : ''}`, { cache: 'no-store' });
-    const result = await response.json() as any;
+    const result = await response.json() as RoomState & { rooms: Room[]; error?: string };
     if (response.status === 401) { setUser(null); setState(null); setRooms([]); setLoading(false); return; }
     if (!response.ok) throw new Error(result.error || 'Veriler alınamadı.');
     setUser(result.user);
@@ -83,17 +83,18 @@ export default function Home() {
       setBudget(result.members.find((member: Member) => member.id === result.user.id)?.budget?.toString() ?? '');
     } else setRooms(result.rooms);
     setLoading(false);
-  }, [roomId]);
+  }, []);
 
   useEffect(() => {
-    setInvite(new URLSearchParams(window.location.search).get('invite') ?? '');
+    // load waits for fetch before updating state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load(null).catch(error => { setMessage(error.message); setLoading(false); });
   }, [load]);
 
-  async function run(action: string, fields: Record<string, unknown>, after?: (result: any) => void) {
+  async function run<T = Record<string, unknown>>(action: string, fields: Record<string, unknown>, after?: (result: T) => void) {
     setBusy(true); setMessage('');
     try {
-      const result = await api(action, fields);
+      const result = await api<T>(action, fields);
       if (after) after(result);
       await load(action === 'login' || action === 'register' || action === 'logout' || action === 'createRoom' || action === 'joinRoom' ? null : roomId);
       if (action !== 'login' && action !== 'register' && action !== 'logout') setMessage('Kaydedildi.');
@@ -144,7 +145,7 @@ export default function Home() {
 
   function selectRoom(id: string) {
     setRoomId(id); setState(null); setMonthIndex(0); setTab('calendar'); setCalendarView('mine'); setSelectedDay(''); setMessage(''); setLoading(true);
-    load(id).catch(error => { setMessage(error.message); setLoading(false); });
+    load(id).catch(error => { setRoomId(null); setMessage(error.message); setLoading(false); });
   }
 
   if (loading && !user) return <main className="loading-screen"><img className="brand-mark" src="/favicon.svg" width="50" height="50" alt="" /><p>Takvim açılıyor…</p></main>;
@@ -158,12 +159,13 @@ export default function Home() {
     <main id="main" className="main-wrap">
       {message && <div className={`notice ${message === 'Kaydedildi.' ? 'notice-ok' : ''}`} role="status"><span>{message}</span><button onClick={() => setMessage('')} aria-label="Bildirimi kapat"><X size={16} /></button></div>}
       {!user ? <section className="auth-layout">
-        <div className="auth-intro"><h1>Herkese uyan bir<br/><em>gün bulalım.</em></h1><p>Arkadaşlarınla uygun günleri aynı takvimde gör. Gezi fikirlerini de birlikte karşılaştır.</p><div className="hero-scene" aria-hidden="true"><span className="scene-sun"/><img src="/illustrations/friends-map.webp" width="1000" height="833" alt="" decoding="async" /></div></div>
+        <div className="auth-intro"><h1>Herkese uyan bir<br/><em>gün bulalım.</em></h1><p>Arkadaşlarınla uygun günleri aynı takvimde gör. Gezi fikirlerini de birlikte karşılaştır.</p></div>
         <form className="auth-card" onSubmit={event => { event.preventDefault(); run(authMode, { username, password }, () => setPassword('')); }}><h2>{authMode === 'login' ? 'Tekrar hoş geldin' : 'Aramıza katıl'}</h2><p>{authMode === 'login' ? 'Takvimine kaldığın yerden devam et.' : 'Bir kullanıcı adı ve şifre belirle.'}</p><label>Kullanıcı adı<input value={username} onChange={event => setUsername(event.target.value)} minLength={3} maxLength={30} autoComplete="username" required placeholder="Kullanıcı adın" /></label><label>Şifre<input type="password" value={password} onChange={event => setPassword(event.target.value)} minLength={authMode === 'register' ? 10 : 1} maxLength={128} autoComplete={authMode === 'login' ? 'current-password' : 'new-password'} required placeholder={authMode === 'register' ? 'En az 10 karakter' : 'Şifren'} /></label><button className="primary-button full" disabled={busy}>{authMode === 'login' ? 'Giriş yap' : 'Hesap oluştur'} <ChevronRight size={18}/></button><button type="button" className="text-button" onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setMessage(''); }}>{authMode === 'login' ? 'Hesabın yok mu? Kayıt ol' : 'Zaten hesabın var mı? Giriş yap'}</button></form>
-      </section> : !state ? <section className="dashboard">
+        <div className="hero-scene" aria-hidden="true"><span className="scene-sun"/><img src="/illustrations/friends-map.webp" width="1000" height="833" alt="" decoding="async" /></div>
+      </section> : roomId && loading && !state ? <section className="room-loading" role="status" aria-live="polite"><img src="/illustrations/friends-map.webp" width="1000" height="833" alt="" /><h1>Oda açılıyor…</h1><p>Takvim ve gezi fikirleri hazırlanıyor.</p></section> : !state ? <section className="dashboard">
         <div className="section-heading"><div><h1>Odaların </h1><p>Arkadaş grupların, ortak takvimleriniz ve gezi fikirleriniz burada.</p></div><img className="dashboard-art" src="/illustrations/friends-trip.webp" width="1000" height="667" alt="" aria-hidden="true" decoding="async" /></div>
         {invite && <div className="invite-card"><div><h2>Bir odaya davetlisin</h2><p>Katılım isteğin oda yöneticisine gönderilecek.</p></div><button className="primary-button" disabled={busy} onClick={() => run('joinRoom', { inviteToken: invite }, () => { setInvite(''); history.replaceState(null, '', '/'); })}>Katılma isteği gönder <ChevronRight size={18}/></button></div>}
-        <div className="dashboard-grid"><div className="room-list"><h2>Odalarım <span>{rooms.length}</span></h2>{rooms.length === 0 ? <div className="empty-state"><img className="empty-art" src="/illustrations/friends-map.webp" width="1000" height="833" alt="" aria-hidden="true" loading="lazy" decoding="async" /><h3>Henüz odan yok</h3><p>Bir oda açıp arkadaşlarınla uygun günleri işaretleyebilirsin.</p></div> : rooms.map(room => <button key={room.id} className="room-card" disabled={room.status !== 'approved'} onClick={() => selectRoom(room.id)}><span className="room-avatar"><Users size={24}/></span><span><strong>{room.name}</strong><small>{room.status === 'approved' ? 'Takvimi aç' : 'Yönetici onayı bekleniyor'}</small></span><ChevronRight size={19}/></button>)}</div><form className="create-card" onSubmit={event => { event.preventDefault(); run('createRoom', { name: newRoom }, result => { setNewRoom(''); setTimeout(() => selectRoom(result.roomId), 150); }); }}><h2>Yeni bir oda aç</h2><p>Birlikte plan yapacağın gruba isim ver.</p><label>Oda adı<input value={newRoom} onChange={event => setNewRoom(event.target.value)} maxLength={60} required placeholder="Grubunun adı" /></label><button className="primary-button full" disabled={busy}>Oda oluştur <Plus size={18}/></button></form></div>
+        <div className="dashboard-grid"><div className="room-list"><h2>Odalarım <span>{rooms.length}</span></h2>{rooms.length === 0 ? <div className="empty-state"><img className="empty-art" src="/illustrations/friends-map.webp" width="1000" height="833" alt="" aria-hidden="true" loading="lazy" decoding="async" /><h3>Henüz odan yok</h3><p>Bir oda açıp arkadaşlarınla uygun günleri işaretleyebilirsin.</p></div> : rooms.map(room => <button key={room.id} className="room-card" disabled={room.status !== 'approved'} onClick={() => selectRoom(room.id)}><span className="room-avatar"><Users size={24}/></span><span><strong>{room.name}</strong><small>{room.status === 'approved' ? 'Takvimi aç' : 'Yönetici onayı bekleniyor'}</small></span><ChevronRight size={19}/></button>)}</div><form className="create-card" onSubmit={event => { event.preventDefault(); run<{ roomId: string }>('createRoom', { name: newRoom }, result => { setNewRoom(''); setTimeout(() => selectRoom(result.roomId), 150); }); }}><h2>Yeni bir oda aç</h2><p>Birlikte plan yapacağın gruba isim ver.</p><label>Oda adı<input value={newRoom} onChange={event => setNewRoom(event.target.value)} maxLength={60} required placeholder="Grubunun adı" /></label><button className="primary-button full" disabled={busy}>Oda oluştur <Plus size={18}/></button></form></div>
       </section> : <section className="workspace">
         <div className="workspace-top"><img className="workspace-art" src="/illustrations/friends-map.webp" width="1000" height="833" alt="" aria-hidden="true" decoding="async" /><button className="back-button" onClick={() => { setRoomId(null); setState(null); load(null); }}><ChevronLeft size={17}/> Odalarım</button><div className="room-title-row"><div><h1>{state.room.name}</h1><p>Takvim ve gezi fikirleri</p></div><div className="room-badge"><Users size={20}/><strong>{state.members.length}</strong><span>üye</span></div></div><div className="tabs" role="tablist" aria-label="Oda bölümleri"><button role="tab" aria-selected={tab === 'calendar'} className={tab === 'calendar' ? 'active' : ''} onClick={() => setTab('calendar')}><CalendarDays size={18}/> Takvim</button><button role="tab" aria-selected={tab === 'trips'} className={tab === 'trips' ? 'active' : ''} onClick={() => setTab('trips')}><Ticket size={18}/> Geziler <span className="tab-count">{state.trips.length}</span></button><button role="tab" aria-selected={tab === 'members'} className={tab === 'members' ? 'active' : ''} onClick={() => setTab('members')}><Users size={18}/> Üyeler</button></div></div>
 
